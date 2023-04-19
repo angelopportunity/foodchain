@@ -1,0 +1,18 @@
+Cat:
+
++Feeds on Eaters
+
+Rat:
+
+Plants dead Cats which grow into trees, the more fit the cat, the more fruit the tree has
++Eats Fruit from Trees
+
+Eater:
+
++Eats Rats
+
+Tree:
+
+
+
+
