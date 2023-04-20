@@ -31,8 +31,8 @@ function Bird:live(dt)
         self.goalx = nearbyRats[1].x
         self.goaly = nearbyRats[1].y
     else
-        self.goalx = nil
-        self.goaly = nil
+        self.goalx = self.x + math.random(-50, 50)
+        self.goaly = self.y + math.random(-50, 50)
     end
     self:hunt(dt)
 end

@@ -17,6 +17,7 @@ function Cat:newCat(x, y)
     local cat = {}
     setmetatable(cat, self)
 
+    --Movement--
     cat.x = x
     cat.y = y
     cat.speed = 30
@@ -24,11 +25,14 @@ function Cat:newCat(x, y)
     cat.goaly = nil
     cat.xvel = 0
     cat.yvel = 0
+    --Visuals--
     cat.sprite = neutral
     cat.huntTimer = 0
     cat.hopping = false
     cat.hopFrames = 80
     cat.hopCooldown = 200
+    --Energy--
+    cat.energy = 100
 
     return cat
 end
@@ -36,13 +40,16 @@ end
 
 
 function Cat:live(dt)
-    local nearbyBirds = self:sense(100)
+    local nearbyBirds, nearbyCats = self:sense(100)
     if #nearbyBirds > 0 then
         self.goalx = nearbyBirds[1].x
         self.goaly = nearbyBirds[1].y
+    else if #nearbyCats > 0 then
+        self.goalx = nearbyCats[1].x
+        self.goaly = nearbyCats[1].y
     else
-        self.goalx = nil
-        self.goaly = nil
+        self.goalx = self.x + math.random(-10, 10)
+        self.goaly = self.y + math.random(-10, 10)
     end
     
     if self.huntTimer <= self.hopFrames then
@@ -67,6 +74,7 @@ function Cat:live(dt)
         self.hopping = false
     end
 
+end
 end
 
 function Cat:physics(dt)
@@ -135,7 +143,17 @@ function Cat:sense(radius)
             table.insert(nearbyBirds, bird)
         end
     end
-    return nearbyBirds
+
+    local nearbyCats = {}
+    for i, othercat in ipairs(Cats) do
+        local distance = math.sqrt((othercat.x - self.x)^2 + (othercat.y - self.y)^2)
+        if distance < radius and distance ~= 0 then
+            table.insert(nearbyCats, othercat)
+        end
+    end
+
+    return nearbyBirds, nearbyCats
+
 end
 
 return Cat
