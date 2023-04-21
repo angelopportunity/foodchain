@@ -2,6 +2,7 @@
 
 local anim8 = require 'modules.anim8'
 
+local circleCenters = {}
 local Cat = {}
 Cat.__index = Cat
 
@@ -23,6 +24,7 @@ function Cat:newCat(x, y)
     cat.speed = 30
     cat.goalx = nil
     cat.goaly = nil
+    cat.goal = nil
     cat.xvel = 0
     cat.yvel = 0
     --Visuals--
@@ -33,6 +35,7 @@ function Cat:newCat(x, y)
     cat.hopCooldown = 200
     --Energy--
     cat.energy = 100
+    
 
     return cat
 end
@@ -41,17 +44,21 @@ end
 
 function Cat:live(dt)
     local nearbyBirds, nearbyCats = self:sense(100)
-    if #nearbyBirds > 0 then
-        self.goalx = nearbyBirds[1].x
-        self.goaly = nearbyBirds[1].y
-    else if #nearbyCats > 0 then
-        self.goalx = nearbyCats[1].x
-        self.goaly = nearbyCats[1].y
-    else
-        self.goalx = self.x + math.random(-10, 10)
-        self.goaly = self.y + math.random(-10, 10)
+    if self.goal ~= "join circle" then
+        if #nearbyBirds > 0 then
+            self.goal = "bird"
+            self.goalx = nearbyBirds[1].x
+            self.goaly = nearbyBirds[1].y
+        elseif #nearbyCats > 0 then
+            self.goal = "cat"
+            self.goalx = nearbyCats[1].x
+            self.goaly = nearbyCats[1].y
+        else
+            self.goalx = self.x + math.random(-10, 10)
+            self.goaly = self.y + math.random(-10, 10)
+        end
     end
-    
+
     if self.huntTimer <= self.hopFrames then
         self:hunt(dt)
     end
@@ -67,15 +74,14 @@ function Cat:live(dt)
     end
 
     self.huntTimer = self.huntTimer + 1
-    
+
     if self.xvel ~= 0 or self.yvel ~= 0 then
         self.hopping = true
     else
         self.hopping = false
     end
+end
 
-end
-end
 
 function Cat:physics(dt)
     self.x = self.x + self.xvel * dt
@@ -116,24 +122,28 @@ function Cat:draw()
 end
 
 
-    function Cat:hunt(dt)
-        if self.goalx and self.goaly and self.huntTimer > 0 then
-            if self.huntTimer == 1 then
-                local dx = self.goalx - self.x
-                local dy = self.goaly - self.y
-                local distance = math.sqrt(dx * dx + dy * dy)
-                if distance > 1 then
-                    local direction = {x = dx / distance, y = dy / distance}
-                    self.xvel = direction.x * self.speed
-                    self.yvel = direction.y * self.speed
+function Cat:hunt(dt)
+    if self.goalx and self.goaly and self.huntTimer > 0 then
+        if self.huntTimer == 1 then
+            local dx = self.goalx - self.x
+            local dy = self.goaly - self.y
+            local distance = math.sqrt(dx * dx + dy * dy)
+            if distance > 10 then
+                local direction = {x = dx / distance, y = dy / distance}
+                self.xvel = direction.x * self.speed
+                self.yvel = direction.y * self.speed
+            else
+                if self.goal == "cat" then
+                    self:joinCircle()
                 else
                     self.goalx = nil
                     self.goaly = nil
                 end
             end
-            self.huntTimer = self.huntTimer + 1
         end
+        self.huntTimer = self.huntTimer + 1
     end
+end
 
 function Cat:sense(radius)
     local nearbyBirds = {}
@@ -154,6 +164,42 @@ function Cat:sense(radius)
 
     return nearbyBirds, nearbyCats
 
+end
+
+function Cat:joinCircle()
+    local nearbyBirds, nearbyCats = self:sense(100)
+    if #nearbyBirds > 0 then
+        self.goal = "bird"
+        self.goalx = nearbyBirds[1].x
+        self.goaly = nearbyBirds[1].y
+    else
+        self.goal = "join circle"
+
+        if not self.circleCenterId then
+            self.circleCenterId = self
+        end
+
+        local centerX, centerY = self.circleCenterId.x, self.circleCenterId.y
+        local circleRadius = 20
+
+        local totalCats = #nearbyCats + 1
+        local sortedCats = {self}
+        for _, cat in ipairs(nearbyCats) do
+            cat.circleCenterId = self.circleCenterId
+            table.insert(sortedCats, cat)
+        end
+
+        table.sort(sortedCats, function(a, b)
+            return math.atan2(a.y - centerY, a.x - centerX) < math.atan2(b.y - centerY, b.x - centerX)
+        end)
+
+        for i, cat in ipairs(sortedCats) do
+            local angle = (2 * math.pi / totalCats) * (i - 1)
+            cat.goalx = centerX + circleRadius * math.cos(angle)
+            cat.goaly = centerY + circleRadius * math.sin(angle)
+            cat.huntTimer = 0
+        end
+    end
 end
 
 return Cat

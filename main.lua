@@ -21,7 +21,7 @@ function love.load()
         table.insert(Birds, Bird:newBird(math.random(100, 900), math.random(100, 900)))
     end
 
-    for i = 1, 20 do 
+    for i = 1, 90 do 
         table.insert(Cats, Cat:newCat(math.random(100, 900), math.random(100, 900)))
     end
 
@@ -52,8 +52,32 @@ function love.update(dt)
 end
 
 function love.draw()
+
     if Test1 then
-    love.graphics.print(Test1)
+        love.graphics.print(Test1)
+    end
+
+    if Test2 then
+        love.graphics.print(Test2, 0, 10)
+    end
+
+    if Test3 then
+        love.graphics.print(Test3, 0, 20)
+    end
+
+    if love.mouse.isDown(1) then
+        local x, y = love.mouse.getPosition()
+        for i, cat in ipairs(Cats) do
+            if x >= cat.x - 20 and x <= cat.x + 20 and y >= cat.y - 20 and y <= cat.y + 20 then
+                Test1 = cat.goal
+                Test2 = cat.goalx
+                Test3 = cat.goaly
+            end
+        end
+    end
+
+    if Test1 then 
+        love.graphics.print(Test1)
     end
     
     for i, bird in ipairs(Birds) do
@@ -61,9 +85,7 @@ function love.draw()
     end
 
     for i, cat in ipairs(Cats) do
-        
         cat:draw()
-
     end
 
     for i, rat in ipairs(Rats) do
