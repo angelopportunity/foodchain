@@ -7,8 +7,7 @@ Cat.__index = Cat
 local spritesheet = love.graphics.newImage('sprites/catspritesheet.png')
 local grid = anim8.newGrid(16, 17, spritesheet:getWidth(), spritesheet:getHeight())
 local shadow = love.graphics.newImage("sprites/catshadow.png")
-local jump = anim8.newAnimation(grid('1-3',1), 0.1)
-local jumping = anim8.newAnimation(grid('3-3',1), 0.1)
+
 local neutral = anim8.newAnimation(grid('1-1',1), 0.1)
 
 
@@ -33,6 +32,8 @@ function Cat:newCat(x, y)
     cat.hopFrames = 80
     cat.hopCooldown = 200
     cat.talking = anim8.newAnimation(grid('1-2',2), .25)
+    cat.jump = anim8.newAnimation(grid('1-3',1), 0.1)
+    cat.jumping = anim8.newAnimation(grid('3-3',1), 0.1)
     --Energy--
     cat.energy = 100
     
@@ -54,8 +55,8 @@ function Cat:live(dt)
             self.goalx = nearbyCats[1].x
             self.goaly = nearbyCats[1].y
         else
-            self.goalx = self.x + math.random(-10, 10)
-            self.goaly = self.y + math.random(-10, 10)
+            self.goalx = self.x + math.random(-25, 25)
+            self.goaly = self.y + math.random(-25, 25)
         end
     end
 
@@ -80,6 +81,9 @@ function Cat:live(dt)
     else
         self.hopping = false
     end
+    
+    -- update animation frames
+    self.sprite:update(dt)
 end
 
 
@@ -100,9 +104,9 @@ function Cat:draw()
 
     if self.hopping == true then
         if self.huntTimer > 0 and self.huntTimer < 4 then
-            self.sprite = jump
+            self.sprite = self.jump
         elseif self.huntTimer >= 4 and self.huntTimer < self.hopFrames then
-            self.sprite = jumping
+            self.sprite = self.jumping
         elseif self.huntTimer >= self.hopFrames then
             self.sprite = neutral
         end
