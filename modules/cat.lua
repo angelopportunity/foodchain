@@ -1,5 +1,3 @@
---IMPLEMENT HOP COOLDOWN!!!
-
 local anim8 = require 'modules.anim8'
 
 local circleCenters = {}
@@ -12,6 +10,7 @@ local shadow = love.graphics.newImage("sprites/catshadow.png")
 local jump = anim8.newAnimation(grid('1-3',1), 0.1)
 local jumping = anim8.newAnimation(grid('3-3',1), 0.1)
 local neutral = anim8.newAnimation(grid('1-1',1), 0.1)
+
 
 
 function Cat:newCat(x, y)
@@ -33,6 +32,7 @@ function Cat:newCat(x, y)
     cat.hopping = false
     cat.hopFrames = 80
     cat.hopCooldown = 200
+    cat.talking = anim8.newAnimation(grid('1-2',2), .25)
     --Energy--
     cat.energy = 100
     
@@ -92,8 +92,10 @@ function Cat:physics(dt)
 end
 
 function Cat:draw()
-    if self.hopping == false then
+    if self.hopping == false and self.goal ~= "join circle" then
         self.sprite = neutral
+    elseif self.hopping == false and self.goal == "join circle" then
+        self.sprite = self.talking
     end
 
     if self.hopping == true then
@@ -128,7 +130,7 @@ function Cat:hunt(dt)
             local dx = self.goalx - self.x
             local dy = self.goaly - self.y
             local distance = math.sqrt(dx * dx + dy * dy)
-            if distance > 10 then
+            if distance > 15  then
                 local direction = {x = dx / distance, y = dy / distance}
                 self.xvel = direction.x * self.speed
                 self.yvel = direction.y * self.speed
@@ -180,7 +182,7 @@ function Cat:joinCircle()
         end
 
         local centerX, centerY = self.circleCenterId.x, self.circleCenterId.y
-        local circleRadius = 20
+        local circleRadius = 30
 
         local totalCats = #nearbyCats + 1
         local sortedCats = {self}
