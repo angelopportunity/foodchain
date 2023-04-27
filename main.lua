@@ -17,15 +17,15 @@ function love.load()
     Birds = {}
     Trees = {}
 
-    for i = 1, 3 do 
+    for i = 1, 2 do 
         table.insert(Birds, Bird:newBird(math.random(100, 900), math.random(100, 900)))
     end
 
-    for i = 1, 90 do 
+    for i = 1, 30 do 
         table.insert(Cats, Cat:newCat(math.random(100, 900), math.random(100, 900)))
     end
 
-    for i = 1, 20 do 
+    for i = 1, 30 do 
         table.insert(Rats, Rat:newRat(math.random(100, 900), math.random(100, 900)))
     end
 

@@ -5,8 +5,7 @@ Bird.__index = Bird
 
 local spritesheet = love.graphics.newImage('sprites/birdwalk.png')
 local grid = anim8.newGrid(80, 80, spritesheet:getWidth(), spritesheet:getHeight())
-local walking = anim8.newAnimation(grid('1-15',1), 0.25)
-local neutral = anim8.newAnimation(grid('1-1', 1), 0.1)
+
 
 
 function Bird:newBird(x, y) 
@@ -19,9 +18,11 @@ function Bird:newBird(x, y)
     bird.goaly = nil
     bird.xvel = 0
     bird.yvel = 0
-    bird.sprite = neutral
     bird.pauseCounter = 0
     bird.pauseDuration = 10
+    bird.walking = anim8.newAnimation(grid('1-15',1), 0.25)
+    bird.neutral = anim8.newAnimation(grid('1-1', 1), 0.1)
+    bird.sprite = bird.neutral
     return bird
 end
 
@@ -113,9 +114,9 @@ end
 
 function Bird:draw()
     if self.xvel ~= 0 or self.yvel ~= 0 then
-        self.sprite = walking
+        self.sprite = self.walking
     else
-        self.sprite = neutral
+        self.sprite = self.neutral
     end
     self.sprite:draw(spritesheet, math.floor(self.x), math.floor(self.y))
 end

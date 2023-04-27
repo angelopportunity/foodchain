@@ -7,7 +7,6 @@ Cat.__index = Cat
 local spritesheet = love.graphics.newImage('sprites/catspritesheet.png')
 local grid = anim8.newGrid(16, 17, spritesheet:getWidth(), spritesheet:getHeight())
 local shadow = love.graphics.newImage("sprites/catshadow.png")
-
 local neutral = anim8.newAnimation(grid('1-1',1), 0.1)
 
 
